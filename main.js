@@ -127,10 +127,12 @@ const MobileMenu = {
     toggle: null,
     menu: null,
     isOpen: false,
+    body: null,
 
     init() {
         this.toggle = document.getElementById('menuToggle');
         this.menu = document.getElementById('navMenu');
+        this.body = document.body;
 
         if (!this.toggle || !this.menu) return;
 
@@ -148,12 +150,27 @@ const MobileMenu = {
                 this.closeMenu();
             }
         });
+        
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isOpen) {
+                this.closeMenu();
+            }
+        });
+        
+        // Close menu on window resize to desktop size
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768 && this.isOpen) {
+                this.closeMenu();
+            }
+        });
     },
 
     handleToggle() {
         this.isOpen = !this.isOpen;
         this.menu.classList.toggle('active', this.isOpen);
         this.toggle.classList.toggle('active', this.isOpen);
+        this.body.classList.toggle('menu-open', this.isOpen);
         
         // Animate hamburger icon
         const spans = this.toggle.querySelectorAll('span');
@@ -172,6 +189,7 @@ const MobileMenu = {
         this.isOpen = false;
         this.menu.classList.remove('active');
         this.toggle.classList.remove('active');
+        this.body.classList.remove('menu-open');
         
         const spans = this.toggle.querySelectorAll('span');
         spans[0].style.transform = 'none';
@@ -448,8 +466,75 @@ document.addEventListener('keydown', function(e) {
 
 /**
  * ============================================
+ * TOUCH OPTIMIZATION MODULE
+ * Improve mobile touch interactions
+ * ============================================
+ */
+const TouchOptimization = {
+    init() {
+        this.addTouchFeedback();
+        this.preventDoubleTapZoom();
+        this.improveScrolling();
+    },
+    
+    addTouchFeedback() {
+        // Add visual feedback for touch interactions
+        const touchElements = document.querySelectorAll('.btn, .nav-link, .feature-card, .testimonial-card, .award-item');
+        
+        touchElements.forEach(element => {
+            element.addEventListener('touchstart', function() {
+                this.style.opacity = '0.8';
+            }, { passive: true });
+            
+            element.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.style.opacity = '1';
+                }, 150);
+            }, { passive: true });
+            
+            element.addEventListener('touchcancel', function() {
+                this.style.opacity = '1';
+            }, { passive: true });
+        });
+    },
+    
+    preventDoubleTapZoom() {
+        // Prevent double-tap zoom on buttons and interactive elements
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                if (e.target.closest('.btn, button, a')) {
+                    e.preventDefault();
+                }
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+    },
+    
+    improveScrolling() {
+        // Smooth scrolling for mobile
+        if ('scrollBehavior' in document.documentElement.style) {
+            document.documentElement.style.scrollBehavior = 'smooth';
+        }
+        
+        // Prevent rubber band effect on iOS (optional)
+        let startY = 0;
+        document.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].pageY;
+        }, { passive: true });
+    }
+};
+
+// Initialize touch optimization
+if (window.innerWidth <= 768) {
+    TouchOptimization.init();
+}
+
+/**
+ * ============================================
  * CONSOLE BRANDING
  * ============================================
  */
-console.log('%c🎧 Covasol Gear', 'font-size: 24px; font-weight: bold; background: linear-gradient(135deg, #00f5ff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;');
+console.log('%cCovasol Gear', 'font-size: 24px; font-weight: bold; background: linear-gradient(135deg, #00f5ff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;');
 console.log('%cPremium Headphones by covasol.com.vn', 'font-size: 12px; color: #888;');
