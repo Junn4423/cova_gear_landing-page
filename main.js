@@ -1,20 +1,20 @@
 /**
  * ============================================
- * COVASOL GEAR - Main JavaScript
- * Features: Sticky Header, Scroll Animations, 
- *           Interactive Hotspots, Mobile Menu
+ * COVASOL GEAR - High-End Landing Page
+ * Smooth Parallax, Animations & Interactions
  * ============================================
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize all modules
     StickyHeader.init();
     ScrollAnimations.init();
+    ParallaxEngine.init();
     MobileMenu.init();
     SmoothScroll.init();
-    FAQAccordion.init();
-    
-    console.log('🎧 Covasol Gear - Website initialized');
+    CursorGlow.init();
+
+    console.log('🎧 Covasol Gear - High-End Experience Loaded');
 });
 
 /**
@@ -28,11 +28,9 @@ const StickyHeader = {
     lastScrollY: 0,
     scrollThreshold: 100,
     isHidden: false,
-    announcementBar: null,
 
     init() {
         this.header = document.getElementById('header');
-        this.announcementBar = document.querySelector('.announcement-bar');
         if (!this.header) return;
 
         window.addEventListener('scroll', this.handleScroll.bind(this), { passive: true });
@@ -40,10 +38,9 @@ const StickyHeader = {
 
     handleScroll() {
         const currentScrollY = window.scrollY;
-        const announcementHeight = this.announcementBar?.offsetHeight || 40;
-        
-        // Add scrolled class for background and adjust position
-        if (currentScrollY > announcementHeight) {
+
+        // Add scrolled class for background
+        if (currentScrollY > 50) {
             this.header.classList.add('scrolled');
         } else {
             this.header.classList.remove('scrolled');
@@ -52,17 +49,14 @@ const StickyHeader = {
         // Smart hide/show based on scroll direction
         if (currentScrollY > this.scrollThreshold) {
             if (currentScrollY > this.lastScrollY && !this.isHidden) {
-                // Scrolling down - hide header
-                this.header.classList.add('hidden');
+                this.header.style.transform = 'translateY(-100%)';
                 this.isHidden = true;
             } else if (currentScrollY < this.lastScrollY && this.isHidden) {
-                // Scrolling up - show header
-                this.header.classList.remove('hidden');
+                this.header.style.transform = 'translateY(0)';
                 this.isHidden = false;
             }
         } else {
-            // Near top - always show
-            this.header.classList.remove('hidden');
+            this.header.style.transform = 'translateY(0)';
             this.isHidden = false;
         }
 
@@ -73,21 +67,21 @@ const StickyHeader = {
 /**
  * ============================================
  * SCROLL ANIMATIONS MODULE
- * Fade-in elements when they enter viewport
+ * Smooth reveal animations on scroll
  * ============================================
  */
 const ScrollAnimations = {
     elements: [],
     observerOptions: {
         root: null,
-        rootMargin: '0px 0px -100px 0px',
+        rootMargin: '0px 0px -80px 0px',
         threshold: 0.1
     },
 
     init() {
         // Select all animated elements
         this.elements = document.querySelectorAll(
-            '.fade-in, .fade-in-left, .fade-in-right, .scale-in, .feature-card'
+            '.reveal, .reveal-left, .reveal-right, .stagger-children'
         );
 
         if (this.elements.length === 0) return;
@@ -102,17 +96,95 @@ const ScrollAnimations = {
             this.elements.forEach(el => observer.observe(el));
         } else {
             // Fallback for older browsers
-            this.elements.forEach(el => el.classList.add('visible'));
+            this.elements.forEach(el => el.classList.add('active'));
         }
     },
 
     handleIntersect(entries, observer) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                // Stop observing after animation
+                entry.target.classList.add('active');
                 observer.unobserve(entry.target);
             }
+        });
+    }
+};
+
+/**
+ * ============================================
+ * PARALLAX ENGINE
+ * Smooth parallax effects for background and elements
+ * ============================================
+ */
+const ParallaxEngine = {
+    parallaxBg: null,
+    cyberGrid: null,
+    heroProduct: null,
+    heroGlow: null,
+    particles: [],
+    ticking: false,
+
+    init() {
+        this.parallaxBg = document.querySelector('.parallax-bg');
+        this.cyberGrid = document.querySelector('.cyber-grid');
+        this.heroProduct = document.querySelector('.hero-product-image');
+        this.heroGlow = document.querySelector('.hero-glow');
+        this.particles = document.querySelectorAll('.particle');
+
+        if (!this.parallaxBg) return;
+
+        // Scroll parallax
+        window.addEventListener('scroll', this.handleScroll.bind(this), { passive: true });
+
+        // Mouse parallax (desktop only)
+        if (window.innerWidth > 768) {
+            window.addEventListener('mousemove', this.handleMouseMove.bind(this), { passive: true });
+        }
+    },
+
+    handleScroll() {
+        if (!this.ticking) {
+            requestAnimationFrame(() => {
+                const scrollY = window.scrollY;
+                const speed = 0.3;
+
+                // Parallax background
+                if (this.parallaxBg) {
+                    this.parallaxBg.style.transform = `translateY(${scrollY * speed}px)`;
+                }
+
+                // Cyber grid slower movement
+                if (this.cyberGrid) {
+                    this.cyberGrid.style.transform = `translateY(${scrollY * 0.15}px)`;
+                }
+
+                this.ticking = false;
+            });
+            this.ticking = true;
+        }
+    },
+
+    handleMouseMove(e) {
+        const { clientX, clientY } = e;
+        const { innerWidth, innerHeight } = window;
+
+        const xPos = (clientX / innerWidth - 0.5) * 30;
+        const yPos = (clientY / innerHeight - 0.5) * 30;
+
+        // Product image follows mouse
+        if (this.heroProduct) {
+            this.heroProduct.style.transform = `translate(${xPos * 0.5}px, ${yPos * 0.5}px)`;
+        }
+
+        // Glow follows mouse
+        if (this.heroGlow) {
+            this.heroGlow.style.transform = `translate(${xPos * -0.3}px, ${yPos * -0.3}px)`;
+        }
+
+        // Move particles slightly
+        this.particles.forEach((particle, index) => {
+            const factor = (index % 3 + 1) * 0.2;
+            particle.style.marginLeft = `${xPos * factor}px`;
         });
     }
 };
@@ -150,14 +222,14 @@ const MobileMenu = {
                 this.closeMenu();
             }
         });
-        
+
         // Close menu on escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.isOpen) {
                 this.closeMenu();
             }
         });
-        
+
         // Close menu on window resize to desktop size
         window.addEventListener('resize', () => {
             if (window.innerWidth > 768 && this.isOpen) {
@@ -171,18 +243,6 @@ const MobileMenu = {
         this.menu.classList.toggle('active', this.isOpen);
         this.toggle.classList.toggle('active', this.isOpen);
         this.body.classList.toggle('menu-open', this.isOpen);
-        
-        // Animate hamburger icon
-        const spans = this.toggle.querySelectorAll('span');
-        if (this.isOpen) {
-            spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
-            spans[1].style.opacity = '0';
-            spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
-        } else {
-            spans[0].style.transform = 'none';
-            spans[1].style.opacity = '1';
-            spans[2].style.transform = 'none';
-        }
     },
 
     closeMenu() {
@@ -190,11 +250,6 @@ const MobileMenu = {
         this.menu.classList.remove('active');
         this.toggle.classList.remove('active');
         this.body.classList.remove('menu-open');
-        
-        const spans = this.toggle.querySelectorAll('span');
-        spans[0].style.transform = 'none';
-        spans[1].style.opacity = '1';
-        spans[2].style.transform = 'none';
     }
 };
 
@@ -207,20 +262,20 @@ const MobileMenu = {
 const SmoothScroll = {
     init() {
         const links = document.querySelectorAll('a[href^="#"]');
-        
+
         links.forEach(link => {
             link.addEventListener('click', (e) => {
                 const href = link.getAttribute('href');
-                
+
                 if (href === '#') return;
-                
+
                 const target = document.querySelector(href);
                 if (target) {
                     e.preventDefault();
-                    
+
                     const headerHeight = document.getElementById('header')?.offsetHeight || 80;
-                    const targetPosition = target.getBoundingClientRect().top + window.scrollY - headerHeight;
-                    
+                    const targetPosition = target.getBoundingClientRect().top + window.scrollY - headerHeight - 20;
+
                     window.scrollTo({
                         top: targetPosition,
                         behavior: 'smooth'
@@ -233,132 +288,79 @@ const SmoothScroll = {
 
 /**
  * ============================================
- * INTERACTIVE HOTSPOTS MODULE
- * For specs page exploded view
+ * CURSOR GLOW EFFECT (Desktop only)
+ * Subtle glow that follows cursor
  * ============================================
  */
-const InteractiveHotspots = {
-    hotspots: [],
-    activeTooltip: null,
+const CursorGlow = {
+    glow: null,
 
     init() {
-        this.hotspots = document.querySelectorAll('.hotspot');
-        
-        if (this.hotspots.length === 0) return;
+        if (window.innerWidth <= 768) return;
 
-        this.hotspots.forEach(hotspot => {
-            // Mouse events for desktop
-            hotspot.addEventListener('mouseenter', (e) => this.showTooltip(e, hotspot));
-            hotspot.addEventListener('mouseleave', () => this.hideTooltip(hotspot));
-            
-            // Touch events for mobile
-            hotspot.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                this.toggleTooltip(hotspot);
+        // Create glow element
+        this.glow = document.createElement('div');
+        this.glow.style.cssText = `
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 245, 255, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s;
+            opacity: 0;
+        `;
+        document.body.appendChild(this.glow);
+
+        // Show glow after a delay
+        setTimeout(() => {
+            this.glow.style.opacity = '1';
+        }, 1000);
+
+        // Follow cursor
+        document.addEventListener('mousemove', (e) => {
+            requestAnimationFrame(() => {
+                this.glow.style.left = e.clientX + 'px';
+                this.glow.style.top = e.clientY + 'px';
             });
-        });
-
-        // Close tooltip when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (this.activeTooltip && !e.target.closest('.hotspot')) {
-                this.hideAllTooltips();
-            }
-        });
-
-        console.log('✨ Interactive hotspots initialized');
-    },
-
-    showTooltip(e, hotspot) {
-        const tooltip = hotspot.querySelector('.tooltip');
-        if (tooltip) {
-            tooltip.style.opacity = '1';
-            tooltip.style.visibility = 'visible';
-            tooltip.style.transform = 'translateX(-50%) translateY(0)';
-            
-            // Add glow effect to hotspot
-            const dot = hotspot.querySelector('.hotspot-dot');
-            if (dot) {
-                dot.style.transform = 'scale(1.3)';
-                dot.style.background = 'linear-gradient(135deg, #00f5ff, #a855f7)';
-            }
-        }
-    },
-
-    hideTooltip(hotspot) {
-        const tooltip = hotspot.querySelector('.tooltip');
-        if (tooltip) {
-            tooltip.style.opacity = '0';
-            tooltip.style.visibility = 'hidden';
-            tooltip.style.transform = 'translateX(-50%) translateY(10px)';
-        }
-        
-        const dot = hotspot.querySelector('.hotspot-dot');
-        if (dot) {
-            dot.style.transform = 'scale(1)';
-            dot.style.background = 'var(--neon-cyan)';
-        }
-    },
-
-    toggleTooltip(hotspot) {
-        const tooltip = hotspot.querySelector('.tooltip');
-        const isVisible = tooltip && tooltip.style.visibility === 'visible';
-        
-        // Hide all other tooltips first
-        this.hideAllTooltips();
-        
-        if (!isVisible) {
-            this.showTooltip(null, hotspot);
-            this.activeTooltip = hotspot;
-        } else {
-            this.activeTooltip = null;
-        }
-    },
-
-    hideAllTooltips() {
-        this.hotspots.forEach(hotspot => this.hideTooltip(hotspot));
-        this.activeTooltip = null;
+        }, { passive: true });
     }
 };
-
-// Initialize hotspots when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if we're on specs page
-    if (document.querySelector('.exploded-section')) {
-        InteractiveHotspots.init();
-    }
-});
 
 /**
  * ============================================
- * PARALLAX EFFECT (Optional enhancement)
- * Subtle parallax on hero section
+ * MAGNETIC BUTTONS (Desktop only)
+ * Buttons that attract to cursor
  * ============================================
  */
-const ParallaxEffect = {
+const MagneticButtons = {
     init() {
-        const hero = document.querySelector('.hero');
-        const product = document.querySelector('.hero-product');
-        
-        if (!hero || !product) return;
+        if (window.innerWidth <= 768) return;
 
-        window.addEventListener('mousemove', (e) => {
-            const { clientX, clientY } = e;
-            const { innerWidth, innerHeight } = window;
-            
-            const xPos = (clientX / innerWidth - 0.5) * 20;
-            const yPos = (clientY / innerHeight - 0.5) * 20;
-            
-            product.style.transform = `translate(${xPos}px, ${yPos}px)`;
+        const buttons = document.querySelectorAll('.btn-primary');
+
+        buttons.forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+
+                btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = '';
+            });
         });
     }
 };
 
-// Initialize parallax on desktop only
-if (window.innerWidth > 768) {
-    document.addEventListener('DOMContentLoaded', () => {
-        ParallaxEffect.init();
-    });
-}
+// Initialize magnetic buttons after DOM load
+document.addEventListener('DOMContentLoaded', () => {
+    MagneticButtons.init();
+});
 
 /**
  * ============================================
@@ -366,175 +368,39 @@ if (window.innerWidth > 768) {
  * Fade in content after page load
  * ============================================
  */
-window.addEventListener('load', function() {
+window.addEventListener('load', function () {
     document.body.style.opacity = '1';
-    
-    // Trigger hero animations
-    const heroContent = document.querySelector('.hero-content');
-    if (heroContent) {
-        heroContent.style.opacity = '1';
-        heroContent.style.transform = 'translateY(0)';
-    }
+
+    // Add loaded class for initial animations
+    document.body.classList.add('loaded');
 });
 
 /**
  * ============================================
- * UTILITY FUNCTIONS
+ * PERFORMANCE OPTIMIZATIONS
  * ============================================
  */
-const Utils = {
-    // Debounce function for scroll events
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    },
 
-    // Throttle function for performance
-    throttle(func, limit) {
-        let inThrottle;
-        return function(...args) {
-            if (!inThrottle) {
-                func.apply(this, args);
-                inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
-            }
-        };
-    },
-
-    // Check if element is in viewport
-    isInViewport(element) {
-        const rect = element.getBoundingClientRect();
-        return (
-            rect.top >= 0 &&
-            rect.left >= 0 &&
-            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-        );
-    }
-};
-
-/**
- * ============================================
- * FAQ ACCORDION MODULE
- * Toggle FAQ answers
- * ============================================
- */
-const FAQAccordion = {
-    init() {
-        const faqItems = document.querySelectorAll('.faq-item');
-        
-        if (faqItems.length === 0) return;
-        
-        faqItems.forEach(item => {
-            const question = item.querySelector('.faq-question');
-            if (question) {
-                question.addEventListener('click', () => {
-                    // Close other items
-                    faqItems.forEach(otherItem => {
-                        if (otherItem !== item && otherItem.classList.contains('active')) {
-                            otherItem.classList.remove('active');
-                        }
-                    });
-                    
-                    // Toggle current item
-                    item.classList.toggle('active');
-                });
-            }
-        });
-    }
-};
-
-/**
- * ============================================
- * KEYBOARD ACCESSIBILITY
- * ============================================
- */
-document.addEventListener('keydown', function(e) {
-    // Close mobile menu with Escape key
-    if (e.key === 'Escape') {
-        MobileMenu.closeMenu?.();
-        InteractiveHotspots.hideAllTooltips?.();
-    }
-});
-
-/**
- * ============================================
- * TOUCH OPTIMIZATION MODULE
- * Improve mobile touch interactions
- * ============================================
- */
-const TouchOptimization = {
-    init() {
-        this.addTouchFeedback();
-        this.preventDoubleTapZoom();
-        this.improveScrolling();
-    },
-    
-    addTouchFeedback() {
-        // Add visual feedback for touch interactions
-        const touchElements = document.querySelectorAll('.btn, .nav-link, .feature-card, .testimonial-card, .award-item');
-        
-        touchElements.forEach(element => {
-            element.addEventListener('touchstart', function() {
-                this.style.opacity = '0.8';
-            }, { passive: true });
-            
-            element.addEventListener('touchend', function() {
-                setTimeout(() => {
-                    this.style.opacity = '1';
-                }, 150);
-            }, { passive: true });
-            
-            element.addEventListener('touchcancel', function() {
-                this.style.opacity = '1';
-            }, { passive: true });
-        });
-    },
-    
-    preventDoubleTapZoom() {
-        // Prevent double-tap zoom on buttons and interactive elements
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(e) {
-            const now = Date.now();
-            if (now - lastTouchEnd <= 300) {
-                if (e.target.closest('.btn, button, a')) {
-                    e.preventDefault();
-                }
-            }
-            lastTouchEnd = now;
-        }, { passive: false });
-    },
-    
-    improveScrolling() {
-        // Smooth scrolling for mobile
-        if ('scrollBehavior' in document.documentElement.style) {
-            document.documentElement.style.scrollBehavior = 'smooth';
-        }
-        
-        // Prevent rubber band effect on iOS (optional)
-        let startY = 0;
-        document.addEventListener('touchstart', function(e) {
-            startY = e.touches[0].pageY;
-        }, { passive: true });
-    }
-};
-
-// Initialize touch optimization
-if (window.innerWidth <= 768) {
-    TouchOptimization.init();
+// Reduce motion for users who prefer it
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.style.scrollBehavior = 'auto';
 }
+
+// Add will-change hints on hover for better performance
+document.querySelectorAll('.feature-card, .testimonial-card, .stat-item').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+        el.style.willChange = 'transform';
+    });
+    el.addEventListener('mouseleave', () => {
+        el.style.willChange = 'auto';
+    });
+});
 
 /**
  * ============================================
  * CONSOLE BRANDING
  * ============================================
  */
-console.log('%cCovasol Gear', 'font-size: 24px; font-weight: bold; background: linear-gradient(135deg, #00f5ff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;');
-console.log('%cPremium Headphones by covasol.com.vn', 'font-size: 12px; color: #888;');
+console.log('%cCovasol Gear', 'font-size: 28px; font-weight: bold; background: linear-gradient(135deg, #00f5ff, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;');
+console.log('%cPremium Headphones by covasol.com.vn', 'font-size: 14px; color: #888;');
+console.log('%c🎧 High-End Landing Page Experience', 'font-size: 12px; color: #00f5ff;');
